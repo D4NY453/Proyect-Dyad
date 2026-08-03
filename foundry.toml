@@ -1,0 +1,8 @@
+[profile.default]
+src = "contracts"
+test = "test"
+solc = "0.8.35"
+remappings = [
+  "@openzeppelin/contracts/=node_modules/@openzeppelin/contracts/",
+  "forge-std/=lib/forge-std/src/"
+]
