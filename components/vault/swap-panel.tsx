@@ -62,16 +62,16 @@ export function SwapPanel({ balances, onRefresh }: { balances: Balances; onRefre
       const erc20Abi = ["function balanceOf(address) external view returns (uint256)"]
       const volatileContract = new ethers.Contract(volatileTokenAddress, erc20Abi, provider)
 
-      const vEthBalanceWei = await volatileContract.balanceOf(userAddress)
-      const currentPriceWei = await vaultContract.getLatestPrice()
+      const vEthBalanceWei: bigint = BigInt(await volatileContract.balanceOf(userAddress))
+      const currentPriceWei: bigint = BigInt(await vaultContract.getLatestPrice())
 
       const targetUsdjWei = ethers.parseUnits(targetUsdj, 18)
-      const currentVethUsdCoverageWei = (vEthBalanceWei * currentPriceWei) / BigInt(1e18)
+      const currentVethUsdCoverageWei = (vEthBalanceWei * currentPriceWei) / (10n ** 18n)
 
-      let ethToDepositWei = BigInt(0)
+      let ethToDepositWei = 0n
       if (targetUsdjWei > currentVethUsdCoverageWei) {
         const usdJDeficitWei = targetUsdjWei - currentVethUsdCoverageWei
-        const vEthDeficitWei = (usdJDeficitWei * BigInt(1e18)) / currentPriceWei
+        const vEthDeficitWei = (usdJDeficitWei * (10n ** 18n)) / currentPriceWei
         ethToDepositWei = (vEthDeficitWei * 4n) + ethers.parseEther("0.005")
       } else {
         ethToDepositWei = ethers.parseEther("0.005")
@@ -152,11 +152,11 @@ export function SwapPanel({ balances, onRefresh }: { balances: Balances; onRefre
       }
 
       // Máximo usdJ respaldado por vETH con margen de seguridad estricto
-      let maxCoveredUsdjWei = (vEthBalanceWei * currentPriceWei) / BigInt(1e18)
+      let maxCoveredUsdjWei = (BigInt(vEthBalanceWei) * BigInt(currentPriceWei)) / (10n ** 18n)
       
       // Margen de seguridad de 0.000001 usdJ
-      if (maxCoveredUsdjWei > BigInt(1000000000000)) {
-        maxCoveredUsdjWei = maxCoveredUsdjWei - BigInt(1000000000000)
+      if (maxCoveredUsdjWei > 1000000000000n) {
+        maxCoveredUsdjWei = maxCoveredUsdjWei - 1000000000000n
       }
 
       let requestedUsdjWei = ethers.parseUnits(targetUsdjAmount, 18)
